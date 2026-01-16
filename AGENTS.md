@@ -1,4 +1,4 @@
-# HeyAI
+# My AI Agent
 
 A CLI-based app for non-interactive (direct) inference from popular AI CLI tools such as Claude Code, Gemini CLI, Codex, OpenCode, etc.
 
@@ -17,13 +17,13 @@ A CLI-based app for non-interactive (direct) inference from popular AI CLI tools
 
 ### Global Installation
 ```bash
-npm install -g heyai
+npm install -g my-ai-agent
 ```
 
 ### Local Development
 ```bash
 git clone <repo-url>
-cd heyai
+cd my-ai-agent
 npm install
 npm link
 ```
@@ -33,8 +33,8 @@ npm link
 ### Basic Usage
 Run AI queries with automatic tool selection:
 ```bash
-ai "explain this code snippet"
-ai "write a function to sort an array"
+agent "explain this code snippet"
+agent "write a function to sort an array"
 ```
 
 ### Tool Management
@@ -42,58 +42,58 @@ ai "write a function to sort an array"
 #### Add a Tool
 Interactive mode:
 ```bash
-ai add
+agent add
 ```
 
 Non-interactive mode:
 ```bash
-ai add --name mytool --command "mytool run" --description "My AI tool"
+agent add --name mytool --command "mytool run" --description "My AI tool"
 ```
 
 #### List All Tools
 ```bash
-ai list
+agent list
 ```
 
 #### View Tool Details
 ```bash
-ai view <tool-name>
+agent view <tool-name>
 ```
 
 #### Edit a Tool
 ```bash
-ai edit [tool-name]
+agent edit [tool-name]
 ```
 
 If tool name is not provided, interactive mode allows selecting a tool and choosing which properties to edit.
 ```bash
-ai edit                           # Interactive mode
-ai edit mytool --name "newname"   # Direct edit
-ai edit --tool-name mytool --name "newname"  # Alternative syntax
+agent edit                           # Interactive mode
+agent edit mytool --name "newname"   # Direct edit
+agent edit --tool-name mytool --name "newname"  # Alternative syntax
 ```
 
 If tool name is not provided, interactive mode allows selecting a tool and choosing which properties to edit.
 ```bash
-ai edit  # Interactive mode
-ai edit mytool --name "newname"  # Direct edit
+agent edit  # Interactive mode
+agent edit mytool --name "newname"  # Direct edit
 ```
 
 #### Delete Tools
 ```bash
-ai delete [tool-name]
+agent delete [tool-name]
 ```
 
 If no tool name is provided, interactive mode allows selecting multiple tools to delete.
 ```bash
-ai delete                   # Interactive mode
-ai delete mytool            # Delete specific tool
-ai delete --tool-name mytool --yes  # Alternative syntax with confirmation skip
+agent delete                   # Interactive mode
+agent delete mytool            # Delete specific tool
+agent delete --tool-name mytool --yes  # Alternative syntax with confirmation skip
 ```
 
 #### Search Tools
 Fuzzy search across tool names and descriptions:
 ```bash
-ai find openai
+agent find openai
 ```
 
 ### Benchmarking
@@ -101,31 +101,31 @@ ai find openai
 #### Check All Tools
 Benchmark all tools and determine the best one:
 ```bash
-ai check
+agent check
 ```
 
 With debug output:
 ```bash
-ai check --debug
+agent check --debug
 ```
 
 ### Advanced Usage
 
 #### Run a Specific Tool
 ```bash
-ai run <tool-name> "your prompt here"
+agent run <tool-name> "your prompt here"
 ```
 
 With debug output:
 ```bash
-ai run <tool-name> "your prompt here" --debug
+agent run <tool-name> "your prompt here" --debug
 ```
 
 #### Export Configuration
 Export current configuration to a file:
 ```bash
-ai export
-ai export /path/to/config.json
+agent export
+agent export /path/to/config.json
 ```
 
 If no path is provided, exports to `config-exported.json` in the config directory.
@@ -133,40 +133,40 @@ If no path is provided, exports to `config-exported.json` in the config director
 #### Import Configuration
 Import configuration from a file (overwrites existing config):
 ```bash
-ai import /path/to/config.json
+agent import /path/to/config.json
 ```
 
 #### Enable/Disable Tools
 Enable or disable tools to control which ones are used:
 ```bash
-ai enable <tool-name>
-ai disable <tool-name>
+agent enable <tool-name>
+agent disable <tool-name>
 ```
 
 Disabled tools are skipped during automatic fallback and benchmarking (unless `--include-disabled` is used with `check`).
 
 #### Check Command Options
 ```bash
-ai check --include-disabled  # Include disabled tools in benchmark
+agent check --include-disabled  # Include disabled tools in benchmark
 ```
 
 #### Onboard Command
-Display comprehensive guide for AI agents learning to use HeyAI:
+Display comprehensive guide for AI agents learning to use My AI Agent:
 ```bash
-ai onboard
+agent onboard
 ```
 
 #### Disable Automatic Fallback
-By default, if the best tool fails, HeyAI tries other working tools. Disable this:
+By default, if the best tool fails, My AI Agent tries other working tools. Disable this:
 ```bash
-ai "prompt" --no-autocheck
+agent "prompt" --no-autocheck
 ```
 
 ## Configuration
 
 Configuration is stored automatically in:
-- **Windows**: `%APPDATA%\heyai-nodejs\Config\config.json`
-- **macOS/Linux**: `~/.config/heyai-nodejs/config.json`
+- **Windows**: `%APPDATA%\my-ai-agent-nodejs\Config\config.json`
+- **macOS/Linux**: `~/.config/my-ai-agent-nodejs/config.json`
 
 ### Config Structure
 ```json
@@ -197,11 +197,11 @@ Configuration is stored automatically in:
 ### Performance Tracking
 - Response times are measured for each tool execution
 - Success/failure rates are tracked
-- Benchmarking (`ai check`) establishes baseline performance
+- Benchmarking (`agent check`) establishes baseline performance
 
 ### Error Handling
 - Silent failure handling during automatic mode
-- Errors stored in `last_error` field for `ai view` inspection
+- Errors stored in `last_error` field for `agent view` inspection
 - Graceful degradation to alternative tools
 
 ## Development

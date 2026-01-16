@@ -9,7 +9,7 @@ export function listCommand(): void {
     const tools = configManager.getTools();
 
     if (tools.length === 0) {
-        console.log(chalk.yellow('No tools configured. Use "ai add" to add a tool.'));
+        console.log(chalk.yellow('No tools configured. Use "agent add" to add a tool.'));
         return;
     }
 

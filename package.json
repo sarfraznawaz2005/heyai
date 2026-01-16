@@ -1,10 +1,10 @@
 {
-  "name": "hey-ai-cli",
-  "version": "1.0.1",
+  "name": "my-ai-agent",
+  "version": "1.0.2",
   "description": "A CLI-based app for non-interactive inference from popular AI CLI tools such as Claude Code, Gemini CLI, Codex, OpenCode, etc.",
   "main": "dist/index.js",
   "bin": {
-    "ai": "dist/index.js"
+    "agent": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

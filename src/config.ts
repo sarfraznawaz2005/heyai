@@ -2,7 +2,7 @@ import Conf from 'conf';
 import { Config, Tool } from './types';
 
 /**
- * Configuration manager for HeyAI
+ * Configuration manager for My AI Agent
  * Uses conf library for cross-platform config storage
  */
 class ConfigManager {
@@ -10,7 +10,7 @@ class ConfigManager {
 
     constructor() {
         this.conf = new Conf<Config>({
-            projectName: 'heyai',
+            projectName: 'my-ai-agent',
             defaults: {
                 tools: [],
                 best: null

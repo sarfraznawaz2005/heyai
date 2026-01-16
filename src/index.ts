@@ -17,12 +17,14 @@ import { enableCommand } from './commands/enable';
 import { disableCommand } from './commands/disable';
 import { onboardCommand } from './commands/onboard';
 
+const { version } = require('../package.json');
+
 const program = new Command();
 
 program
-    .name('ai')
-    .description('A CLI-based tool manager for AI coding tools')
-    .version('1.0.0');
+    .name('agent')
+    .description('A CLI-based app for inference from popular AI CLI tools')
+    .version(version);
 
 // Add command
 program
@@ -117,6 +119,11 @@ program
 // Handle commands and default prompt
 const args = process.argv.slice(2);
 const commands = ['add', 'edit', 'delete', 'view', 'list', 'find', 'check', 'run', 'export', 'import', 'enable', 'disable', 'onboard'];
+
+if (args.includes('--version') || args.includes('-V')) {
+    console.log(version);
+    process.exit(0);
+}
 
 if (args.length > 0 && commands.includes(args[0])) {
     // Known command

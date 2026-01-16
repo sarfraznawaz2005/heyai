@@ -1,6 +1,6 @@
-# HeyAI
+# My AI Agent
 
-A CLI-based app for non-interactive (direct) inference from popular AI CLI tools such as Claude Code, Gemini CLI, Codex, OpenCode, etc. Simply run `ai "your prompt here"` and the app will figure out the best AI CLI agent tool automatically to return answers to your queries.
+A CLI-based app for non-interactive (direct) inference from popular AI CLI tools such as Claude Code, Gemini CLI, Codex, OpenCode, etc. Simply run `agent "your prompt here"` and the app will figure out the best AI CLI agent tool automatically to return answers to your queries.
 
 ## Features
 
@@ -17,25 +17,25 @@ A CLI-based app for non-interactive (direct) inference from popular AI CLI tools
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| `add` | Add a new AI tool | `ai add` (interactive) or `ai add --name tool --command "cmd" --description "desc"` |
-| `edit` | Edit an existing tool | `ai edit <tool-name>` or `ai edit --tool-name <name> --command "new cmd"` |
-| `delete` | Remove tools with confirmation | `ai delete <tool-name>` or `ai delete <tool-name> --yes` |
-| `view` | Show detailed tool information | `ai view <tool-name>` |
-| `list` | Display all tools with status | `ai list` |
-| `find` | Search tools by name/description | `ai find <query>` |
-| `check` | Benchmark all tools | `ai check` or `ai check --debug --include-disabled` |
-| `run` | Execute a specific tool | `ai run <tool-name> "prompt"` or `ai run <tool-name> "prompt" --debug` |
-| `export` | Export configuration to JSON | `ai export` or `ai export /path/to/config.json` |
-| `import` | Import configuration from JSON | `ai import /path/to/config.json` |
-| `enable` | Enable a disabled tool | `ai enable <tool-name>` |
-| `disable` | Disable a tool | `ai disable <tool-name>` |
-| `onboard` | Display comprehensive guide | `ai onboard` |
-| `[query]` | Run query with best tool | `ai "your prompt"` or `ai "prompt" --no-autocheck` |
+| `add` | Add a new AI tool | `agent add` (interactive) or `agent add --name tool --command "cmd" --description "desc"` |
+| `edit` | Edit an existing tool | `agent edit <tool-name>` or `agent edit --tool-name <name> --command "new cmd"` |
+| `delete` | Remove tools with confirmation | `agent delete <tool-name>` or `agent delete <tool-name> --yes` |
+| `view` | Show detailed tool information | `agent view <tool-name>` |
+| `list` | Display all tools with status | `agent list` |
+| `find` | Search tools by name/description | `agent find <query>` |
+| `check` | Benchmark all tools | `agent check` or `agent check --debug --include-disabled` |
+| `run` | Execute a specific tool | `agent run <tool-name> "prompt"` or `agent run <tool-name> "prompt" --debug` |
+| `export` | Export configuration to JSON | `agent export` or `agent export /path/to/config.json` |
+| `import` | Import configuration from JSON | `agent import /path/to/config.json` |
+| `enable` | Enable a disabled tool | `agent enable <tool-name>` |
+| `disable` | Disable a tool | `agent disable <tool-name>` |
+| `onboard` | Display comprehensive guide | `agent onboard` |
+| `[query]` | Run query with best tool | `agent "your prompt"` or `agent "prompt" --no-autocheck` |
 
 ## Installation
 
 ```bash
-npm install -g hey-ai-cli
+npm install -g my-ai-agent
 ```
 
 Or use locally:
@@ -81,92 +81,92 @@ Tip: Replace `gemini` with `qwen` if you want that too.
 
 Interactive mode:
 ```bash
-ai add
+agent add
 ```
 
 Non-interactive mode:
 ```bash
-ai add --name mytool --command "mytool run" --description "My AI tool"
+agent add --name mytool --command "mytool run" --description "My AI tool"
 ```
 
 ### List All Tools
 
 ```bash
-ai list
+agent list
 ```
 
 ### View Tool Details
 
 ```bash
-ai view <tool-name>
+agent view <tool-name>
 ```
 
 ### Find Tools
 
 Fuzzy search across tool names and descriptions:
 ```bash
-ai find openai
+agent find openai
 ```
 
 ### Edit a Tool
 
 Interactive mode:
 ```bash
-ai edit <tool-name>
+agent edit <tool-name>
 ```
 
 Non-interactive mode:
 ```bash
-ai edit <tool-name> --name "newname" --command "new command" --description "new desc"
-ai edit --tool-name <tool-name> --description "updated description"
+agent edit <tool-name> --name "newname" --command "new command" --description "new desc"
+agent edit --tool-name <tool-name> --description "updated description"
 ```
 
 ### Delete a Tool
 
 Interactive mode (with confirmation):
 ```bash
-ai delete <tool-name>
+agent delete <tool-name>
 ```
 
 Non-interactive mode:
 ```bash
-ai delete <tool-name> --yes
-ai delete --tool-name <tool-name> --yes
+agent delete <tool-name> --yes
+agent delete --tool-name <tool-name> --yes
 ```
 
 ### Enable/Disable Tools
 
 ```bash
-ai enable <tool-name>
-ai disable <tool-name>
+agent enable <tool-name>
+agent disable <tool-name>
 ```
 
 ### Check All Tools
 
 Benchmark all tools and determine the best one:
 ```bash
-ai check
+agent check
 ```
 
 With debug output to see each command being executed:
 ```bash
-ai check --debug
+agent check --debug
 ```
 
 Include disabled tools in benchmarking:
 ```bash
-ai check --include-disabled
+agent check --include-disabled
 ```
 
 ### Run a Specific Tool
 
 ```bash
-ai run <tool-name> "your prompt here"
+agent run <tool-name> "your prompt here"
 ```
 
 With debug output:
 ```bash
-ai run <tool-name> "your prompt here" --debug
+agent run <tool-name> "your prompt here" --debug
 # Shows: Debug: Executing command: <actual-command>
 # Then streams the tool output in real-time
 ```
@@ -175,39 +175,39 @@ ai run <tool-name> "your prompt here" --debug
 
 Use the best tool automatically:
 ```bash
-ai "tell me a joke"
+agent "tell me a joke"
 ```
 
 Skip automatic fallback if best tool fails:
 ```bash
-ai "tell me a joke" --no-autocheck
+agent "tell me a joke" --no-autocheck
 ```
 
 ### Configuration Management
 
 Export configuration to a file:
 ```bash
-ai export
-ai export /path/to/config.json
+agent export
+agent export /path/to/config.json
 ```
 
 Import configuration from a file:
 ```bash
-ai import /path/to/config.json
+agent import /path/to/config.json
 ```
 
 ### Onboarding Guide
 
 Display comprehensive onboarding information, useful for AI agents:
 ```bash
-ai onboard
+agent onboard
 ```
 
 ## Configuration
 
 Configuration is stored in a platform-specific location:
-- **Windows**: `%APPDATA%\heyai\config.json`
-- **macOS/Linux**: `~/.config/heyai/config.json`
+- **Windows**: `%APPDATA%\my-ai-agent\config.json`
+- **macOS/Linux**: `~/.config/my-ai-agent/config.json`
 
 ## Development
 
