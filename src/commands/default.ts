@@ -46,7 +46,7 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
 
     // Try other tools
     const allTools = configManager.getTools();
-    const successfulTools = allTools.filter(t => t.okay === true && !t.disabled && t.name !== bestToolName);
+    const successfulTools = allTools.filter(t => t.okay !== null && !t.disabled && t.name !== bestToolName);
     successfulTools.sort((a, b) => (a.time_taken ?? Infinity) - (b.time_taken ?? Infinity));
 
     for (const tool of successfulTools) {

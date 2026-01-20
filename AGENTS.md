@@ -157,7 +157,7 @@ agent onboard
 ```
 
 #### Disable Automatic Fallback
-By default, if the best tool fails, My AI Agent tries other working tools. Disable this:
+By default, if the best tool fails, My AI Agent tries other enabled tools that have been tested. Disable this:
 ```bash
 agent "prompt" --no-autocheck
 ```
@@ -190,7 +190,7 @@ Configuration is stored automatically in:
 
 ### Automatic Tool Selection
 1. **Primary**: Uses the configured "best" tool (fastest successful tool from benchmarks)
-2. **Fallback**: If primary fails, tries other working tools in order of speed
+2. **Fallback**: If primary fails, tries other enabled tools that have been tested, in order of speed
 3. **Success**: Updates "best" tool when a faster alternative succeeds
 4. **Failure**: Stores errors in config for debugging
 
