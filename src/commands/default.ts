@@ -1,7 +1,16 @@
-import chalk from 'chalk';
-import { configManager } from '../config';
-import { runTool } from './run';
-import { checkCommand } from './check';
+ import chalk from 'chalk';
+ import { spawn } from 'child_process';
+ import { configManager } from '../config';
+ import { runTool } from './run';
+ import { checkCommand } from './check';
+
+/**
+ * Shows a balloon notification on Windows
+ */
+function showNotification() {
+    if (process.platform !== 'win32') return;
+    spawn('powershell', ['-ExecutionPolicy', 'Bypass', '-Command', "& {Add-Type -AssemblyName System.Windows.Forms; $notify = New-Object System.Windows.Forms.NotifyIcon; $notify.Icon = [System.Drawing.SystemIcons]::Information; $notify.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Info; $notify.BalloonTipTitle = 'My AI Agent'; $notify.BalloonTipText = 'Agent is done!'; $notify.Visible = $true; $notify.ShowBalloonTip(5000); $notify.Dispose()}"], { stdio: 'ignore' });
+}
 
 /**
  * Default command - runs the best tool with a prompt
@@ -12,13 +21,32 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
     const startTime = performance.now();
 
     if (!bestToolName) {
-        console.log(chalk.yellow('No best tool configured. Running benchmark...'));
-        await checkCommand();
-        // After check, get the new best
-        bestToolName = configManager.getBest();
-        if (!bestToolName) {
-            console.log(chalk.red('No tools passed the benchmark.'));
-            process.exit(1);
+        // Check if we have recent successful tool data
+        const allTools = configManager.getTools();
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        const recentTools = allTools.filter(t =>
+            t.okay &&
+            t.last_ran &&
+            new Date(t.last_ran) > oneHourAgo &&
+            t.time_taken !== undefined
+        );
+
+        if (recentTools.length > 0) {
+            // Use cached data to select best
+            recentTools.sort((a, b) => a.time_taken! - b.time_taken!);
+            bestToolName = recentTools[0].name;
+            configManager.setBest(bestToolName);
+            console.log(chalk.green(`Using cached best tool: ${bestToolName}`));
+        } else {
+            console.log(chalk.yellow('No best tool configured. Running benchmark...'));
+            await checkCommand();
+            // After check, get the new best
+            bestToolName = configManager.getBest();
+            if (!bestToolName) {
+                console.log(chalk.red('No tools passed the benchmark.'));
+                process.exit(1);
+            }
         }
     }
 
@@ -26,10 +54,14 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
     const result = await runTool(bestToolName, prompt, false, true); // silent check
 
     if (result.success) {
-        await runTool(bestToolName, prompt, false, false); // with output
+        // Render the captured output
+        if (result.output) {
+            console.log(result.output);
+        }
         const endTime = performance.now();
         const timeTaken = (endTime - startTime) / 1000;
         console.log(`\n${chalk.dim.italic(`Answered via ${chalk.bold.cyan(bestToolName.toUpperCase())} (BEST) in ${timeTaken.toFixed(1)}s`)}`);
+        showNotification();
         return;
     }
 
@@ -52,11 +84,15 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
     for (const tool of successfulTools) {
         const res = await runTool(tool.name, prompt, false, true);
         if (res.success) {
-            await runTool(tool.name, prompt, false, false);
+            // Render the captured output
+            if (res.output) {
+                console.log(res.output);
+            }
             configManager.setBest(tool.name);
             const endTime = performance.now();
             const timeTaken = (endTime - startTime) / 1000;
             console.log(`\n${chalk.dim.italic(`Answered via ${chalk.bold.cyan(tool.name.toUpperCase())} in ${timeTaken.toFixed(1)}s`)}`);
+            showNotification();
             return;
         } else {
             configManager.updateTool(tool.name, {

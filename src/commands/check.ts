@@ -21,14 +21,20 @@ export async function checkCommand(options?: { debug?: boolean; includeDisabled?
     let bestTool: string | null = null;
     let bestTime = Infinity;
 
-    // Run each tool
-    for (const tool of tools) {
-        if (tool.disabled && !(options?.includeDisabled)) {
-            continue; // Skip disabled tools unless explicitly included
-        }
-        const spinner = ora(`Testing ${tool.name}...`).start();
+    // Filter enabled tools
+    const toolsToCheck = tools.filter(t => !(t.disabled && !(options?.includeDisabled)));
 
-        const result = await executeCommandSilent(tool.command, 'hello', options?.debug || false);
+    // Run all tools in parallel
+    const results = await Promise.all(
+        toolsToCheck.map(async (tool) => {
+            const result = await executeCommandSilent(tool.command, 'hello', options?.debug || false);
+            return { tool, result };
+        })
+    );
+
+    // Process results sequentially for UI updates
+    for (const { tool, result } of results) {
+        const spinner = ora(`Testing ${tool.name}...`).start();
 
         // Update tool metrics
         configManager.updateTool(tool.name, {

@@ -20,25 +20,26 @@ export async function runTool(
     prompt?: string,
     debug = false,
     silent = false
-): Promise<{ success: boolean; error?: string; timeTaken: number }> {
+): Promise<{ success: boolean; error?: string; timeTaken: number; output?: string }> {
     const tool = configManager.getTool(toolName);
 
     if (!tool) {
         throw new Error(`Tool "${toolName}" not found`);
     }
 
-    const captureOutput = !silent;
-    const result = await executeCommand(tool.command, prompt, debug, silent, captureOutput);
+    // Always capture output for potential reuse
+    const result = await executeCommand(tool.command, prompt, debug, silent, true);
 
-    // Always render output with markdown
-    if (captureOutput && result.success && result.stdout) {
+    // Render output with markdown only if not silent
+    if (!silent && result.success && result.stdout) {
         console.log(marked(result.stdout));
     }
 
     return {
         success: result.success,
         error: result.stderr || result.error,
-        timeTaken: result.timeTaken
+        timeTaken: result.timeTaken,
+        output: result.stdout
     };
 }
 

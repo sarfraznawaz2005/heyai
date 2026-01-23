@@ -52,11 +52,11 @@ describe('Default Command', () => {
 
     it('should succeed with best tool', async () => {
         mockConfigManager.getBest.mockReturnValue('best-tool');
-        mockRunTool.mockResolvedValue({ success: true, timeTaken: 1.0 });
+        mockRunTool.mockResolvedValue({ success: true, timeTaken: 1.0, output: 'Hello response' });
 
         await defaultCommand('test prompt');
         expect(mockRunTool).toHaveBeenCalledWith('best-tool', 'test prompt', false, true);
-        expect(mockRunTool).toHaveBeenCalledWith('best-tool', 'test prompt', false, false);
+        expect(mockConsoleLog).toHaveBeenCalledWith('Hello response');
         expect(mockExit).not.toHaveBeenCalled();
     });
 
@@ -72,7 +72,7 @@ describe('Default Command', () => {
         mockConfigManager.getBest.mockReturnValue('best-tool');
         mockRunTool
             .mockResolvedValueOnce({ success: false, timeTaken: 1.0 }) // best tool fails
-            .mockResolvedValueOnce({ success: true, timeTaken: 0.5 }); // alternative succeeds
+            .mockResolvedValueOnce({ success: true, timeTaken: 0.5, output: 'Fast response' }); // alternative succeeds
 
         mockConfigManager.getTools.mockReturnValue([
             { name: 'best-tool', command: 'cmd1', description: 'desc1', time_taken: 1.0, last_ran: null, okay: false },
@@ -81,8 +81,9 @@ describe('Default Command', () => {
         ]);
 
         await defaultCommand('test prompt');
+        expect(mockRunTool).toHaveBeenCalledWith('best-tool', 'test prompt', false, true);
         expect(mockRunTool).toHaveBeenCalledWith('fast-tool', 'test prompt', false, true);
-        expect(mockRunTool).toHaveBeenCalledWith('fast-tool', 'test prompt', false, false);
+        expect(mockConsoleLog).toHaveBeenCalledWith('Fast response');
         expect(mockConfigManager.setBest).toHaveBeenCalledWith('fast-tool');
         expect(mockExit).not.toHaveBeenCalled();
     });
