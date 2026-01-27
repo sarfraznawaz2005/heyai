@@ -30,7 +30,7 @@ A CLI-based app for non-interactive (direct) inference from popular AI CLI tools
 | `enable` | Enable a disabled tool | `agent enable <tool-name>` |
 | `disable` | Disable a tool | `agent disable <tool-name>` |
 | `onboard` | Display comprehensive guide | `agent onboard` |
-| `[query]` | Run query with best tool | `agent "your prompt"` or `agent "prompt" --no-autocheck` |
+| `[prompt]` | Run prompt with best tool | `agent "your prompt"`, `agent your prompt`, `agent --file ./path/to/file.txt` or `agent "prompt" --no-autocheck` |
 
 ## Installation
 
@@ -173,7 +173,7 @@ agent run <tool-name> "your prompt here" --debug
 
 ### Run Best Tool
 
-Use the best tool automatically:
+Use the best tool automatically with a direct prompt:
 ```bash
 agent "tell me a joke"
 ```
@@ -188,6 +188,42 @@ Skip automatic fallback if best tool fails:
 ```bash
 agent "tell me a joke" --no-autocheck
 ```
+
+### File Input Support
+
+You can also provide a file as input using the `--file` flag:
+
+```bash
+agent --file ./path/to/prompt.txt
+```
+
+This works with any text-based file (`.txt`, `.md`, `.js`, `.py`, etc.):
+
+```bash
+agent --file ./my-prompt.md
+agent --file ./instructions.js
+agent --file ./requirements.txt
+```
+
+The agent will read the file content and use it as the prompt for the AI tool.
+
+You can also combine the file flag with other options:
+
+```bash
+agent --file ./prompt.txt --no-autocheck
+```
+
+### Help
+
+Get help with the `--help` option:
+
+```bash
+agent --help
+# or
+agent -h
+```
+
+This will show all available commands and options, including the default usage for running prompts.
 
 ### Configuration Management
 

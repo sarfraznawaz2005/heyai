@@ -24,7 +24,20 @@ const program = new Command();
 program
     .name('agent')
     .description('A CLI-based app for inference from popular AI CLI tools')
-    .version(version);
+    .version(version)
+    .option('-f, --file <file-path>', 'Read prompt from file')
+    .option('--no-autocheck', 'Skip automatic fallback if best tool fails');
+
+// Add examples to the help
+program.addHelpText('after', `
+Examples:
+  $ agent "What is the weather today?"
+  $ agent What is the weather today?
+  $ agent --file ./path/to/prompt.txt
+  $ agent --file ./my-prompt.md
+  $ agent "Explain quantum computing" --no-autocheck
+  $ agent --file ./prompt.txt --no-autocheck
+`);
 
 // Add command
 program
@@ -120,6 +133,7 @@ program
 const args = process.argv.slice(2);
 const commands = ['add', 'edit', 'delete', 'view', 'list', 'find', 'check', 'run', 'export', 'import', 'enable', 'disable', 'onboard'];
 
+// Check for global flags first
 if (args.includes('--version') || args.includes('-V')) {
     console.log(version);
     process.exit(0);
@@ -130,25 +144,70 @@ if (args.includes('--help') || args.includes('-h')) {
     process.exit(0);
 }
 
+// Check if first argument is a known command
 if (args.length > 0 && commands.includes(args[0])) {
-    // Known command
+    // It's a known command, let Commander handle it normally
     program.parse(process.argv);
 } else {
-    // Default command
-    let autocheck = true;
-    let promptArgs = [...args];
-    const noAutocheckIndex = promptArgs.indexOf('--no-autocheck');
-    if (noAutocheckIndex !== -1) {
-        autocheck = false;
-        promptArgs.splice(noAutocheckIndex, 1);
+    // Parse with Commander to get options
+    program.parseOptions(args);
+    const opts = program.opts();
+
+    // Manually extract remaining args after options are processed
+    let remainingArgs = [...args];
+    if (opts.file) {
+        // Remove --file and its value
+        const fileIndex = remainingArgs.indexOf('--file');
+        if (fileIndex !== -1) {
+            remainingArgs.splice(fileIndex, 2); // Remove --file and the next value
+        } else {
+            const fIndex = remainingArgs.indexOf('-f');
+            if (fIndex !== -1) {
+                remainingArgs.splice(fIndex, 2); // Remove -f and the next value
+            }
+        }
     }
 
-    if (promptArgs.length === 0) {
-        program.outputHelp();
-        process.exit(0);
+    if (remainingArgs.includes('--no-autocheck')) {
+        remainingArgs = remainingArgs.filter(arg => arg !== '--no-autocheck');
     }
 
-    const prompt = promptArgs.join(' ');
+    let autocheck = !opts.noAutocheck;
+    let prompt = '';
+
+    if (opts.file) {
+        // Read prompt from file
+        const fs = require('fs');
+        const path = require('path');
+
+        if (!fs.existsSync(opts.file)) {
+            console.error(`Error: File does not exist: ${opts.file}`);
+            process.exit(1);
+        }
+
+        if (!fs.statSync(opts.file).isFile()) {
+            console.error(`Error: Path is not a file: ${opts.file}`);
+            process.exit(1);
+        }
+
+        prompt = fs.readFileSync(opts.file, 'utf-8');
+        console.log(require('chalk').gray(`Reading prompt from file: ${opts.file}`));
+
+        // Convert multi-line content to single line with literal \n to preserve line breaks for AI
+        const singleLinePrompt = prompt.replace(/\n/g, '\\n').trim();
+
+        // Add context to help AI understand it's processing file content
+        prompt = `Instructions: ${singleLinePrompt}. Please follow these instructions exactly.`;
+    } else {
+        // Use prompt from command line arguments
+        if (remainingArgs.length === 0) {
+            program.outputHelp();
+            process.exit(0);
+        }
+
+        prompt = remainingArgs.join(' ');
+    }
+
     defaultCommand(prompt, { autocheck }).catch(error => {
         console.error(error);
         process.exit(1);

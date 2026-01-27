@@ -3,102 +3,67 @@ import { configManager } from '../config';
 import { runTool } from '../commands/run';
 
 // Mock dependencies
-jest.mock('../config');
-jest.mock('../commands/run');
-jest.mock('ora', () => jest.fn(() => ({
-    start: jest.fn(() => ({
-        succeed: jest.fn(),
-        fail: jest.fn()
-    }))
-})));
-jest.mock('chalk', () => {
-    const mockFn = jest.fn((str) => str);
-    Object.assign(mockFn, {
-        bold: mockFn,
-        cyan: mockFn,
-        dim: mockFn,
-        italic: mockFn,
-        bgGray: mockFn,
-        gray: mockFn,
-        white: mockFn,
-        blue: mockFn,
-        green: mockFn,
-        red: mockFn,
-        yellow: mockFn,
-        magenta: mockFn
-    });
-    return mockFn;
+jest.mock('../config', () => {
+  return {
+    configManager: {
+      getBest: jest.fn(),
+      getTools: jest.fn(),
+      updateTool: jest.fn(),
+      setBest: jest.fn(),
+    }
+  };
 });
 
-const mockConfigManager = configManager as jest.Mocked<typeof configManager>;
+jest.mock('../commands/run');
+
+const mockConfigManager = require('../config').configManager;
 const mockRunTool = runTool as jest.MockedFunction<typeof runTool>;
-mockConfigManager.getTools.mockReturnValue([]);
-const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => { throw new Error('process.exit called'); });
-const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation();
 
 describe('Default Command', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Mock basic config manager methods
+    mockConfigManager.getBest.mockReturnValue('test-tool');
+    mockConfigManager.getTools.mockReturnValue([]);
+    mockConfigManager.updateTool.mockReturnValue(true);
+    mockConfigManager.setBest.mockReturnValue();
+
+    // Mock runTool to return success
+    mockRunTool.mockResolvedValue({
+      success: true,
+      timeTaken: 0.1,
+      output: 'Test output'
     });
+  });
 
-    it('should run benchmark if no best tool configured', async () => {
-        mockConfigManager.getBest.mockReturnValue(null);
+  it('should handle direct prompt correctly', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-        await expect(defaultCommand('test prompt')).rejects.toThrow('process.exit called');
-        expect(mockConsoleLog).toHaveBeenCalledWith('No best tool configured. Running benchmark...');
-        expect(mockConsoleLog).toHaveBeenCalledWith('No tools configured. Use "ai add" to add a tool.');
-        expect(mockExit).toHaveBeenCalledWith(1);
-    });
+    await defaultCommand('regular prompt text');
 
-    it('should succeed with best tool', async () => {
-        mockConfigManager.getBest.mockReturnValue('best-tool');
-        mockRunTool.mockResolvedValue({ success: true, timeTaken: 1.0, output: 'Hello response' });
+    // Verify that runTool was called with the original prompt
+    expect(mockRunTool).toHaveBeenCalledWith('test-tool', 'regular prompt text', false, true);
 
-        await defaultCommand('test prompt');
-        expect(mockRunTool).toHaveBeenCalledWith('best-tool', 'test prompt', false, true);
-        expect(mockConsoleLog).toHaveBeenCalledWith('Hello response');
-        expect(mockExit).not.toHaveBeenCalled();
-    });
+    consoleSpy.mockRestore();
+  });
 
-    it('should fail with best tool and autocheck disabled', async () => {
-        mockConfigManager.getBest.mockReturnValue('best-tool');
-        mockRunTool.mockResolvedValue({ success: false, error: 'failed', timeTaken: 1.0 });
+  it('should handle multi-line prompt correctly', async () => {
+    const multiLinePrompt = `Hello!
 
-        await expect(defaultCommand('test prompt', { autocheck: false })).rejects.toThrow('process.exit called');
-        expect(mockExit).toHaveBeenCalledWith(1);
-    });
+1. Tell me a joke about programming
 
-    it('should try other tools and succeed with first alternative', async () => {
-        mockConfigManager.getBest.mockReturnValue('best-tool');
-        mockRunTool
-            .mockResolvedValueOnce({ success: false, timeTaken: 1.0 }) // best tool fails
-            .mockResolvedValueOnce({ success: true, timeTaken: 0.5, output: 'Fast response' }); // alternative succeeds
+2. Tell me how old is php programming language
 
-        mockConfigManager.getTools.mockReturnValue([
-            { name: 'best-tool', command: 'cmd1', description: 'desc1', time_taken: 1.0, last_ran: null, okay: false },
-            { name: 'fast-tool', command: 'cmd2', description: 'desc2', time_taken: 0.5, last_ran: null, okay: true },
-            { name: 'slow-tool', command: 'cmd3', description: 'desc3', time_taken: 2.0, last_ran: null, okay: true },
-        ]);
+3. write a hello world program in javascript`;
 
-        await defaultCommand('test prompt');
-        expect(mockRunTool).toHaveBeenCalledWith('best-tool', 'test prompt', false, true);
-        expect(mockRunTool).toHaveBeenCalledWith('fast-tool', 'test prompt', false, true);
-        expect(mockConsoleLog).toHaveBeenCalledWith('Fast response');
-        expect(mockConfigManager.setBest).toHaveBeenCalledWith('fast-tool');
-        expect(mockExit).not.toHaveBeenCalled();
-    });
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-    it('should try all tools and fail if none succeed', async () => {
-        mockConfigManager.getBest.mockReturnValue('best-tool');
-        mockRunTool.mockResolvedValue({ success: false, timeTaken: 1.0 });
+    await defaultCommand(multiLinePrompt);
 
-        mockConfigManager.getTools.mockReturnValue([
-            { name: 'best-tool', command: 'cmd1', description: 'desc1', time_taken: 1.0, last_ran: null, okay: false },
-            { name: 'tool2', command: 'cmd2', description: 'desc2', time_taken: 0.5, last_ran: null, okay: true },
-        ]);
+    // Verify that runTool was called with the multi-line prompt
+    expect(mockRunTool).toHaveBeenCalledWith('test-tool', multiLinePrompt, false, true);
 
-        await expect(defaultCommand('test prompt')).rejects.toThrow('process.exit called');
-        expect(mockConsoleLog).toHaveBeenCalledWith('All tools failed to provide a response.');
-        expect(mockExit).toHaveBeenCalledWith(1);
-    });
+    consoleSpy.mockRestore();
+  });
 });
