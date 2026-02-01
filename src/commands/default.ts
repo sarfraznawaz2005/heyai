@@ -3,23 +3,29 @@ import { spawn } from 'child_process';
 import { configManager } from '../config';
 import { runTool } from './run';
 import { checkCommand } from './check';
+import * as path from 'path';
 
 /**
- * Shows a notification
+ * Shows a notification (non-blocking, cross-platform)
  */
 function showNotification() {
-    if (process.platform !== 'win32') return;
-
     try {
-        const notifier = require('node-notifier');
-        const notifierObj = new notifier.WindowsBalloon({ withFallback: false });
+        // Use node-notifier CLI which is cross-platform and non-blocking
+        // Execute via node directly to avoid shell window
+        const notifierScript = path.join(__dirname, '..', '..', 'node_modules', 'node-notifier-cli', 'bin.js');
         
-        notifierObj.notify({
-            title: 'My AI Agent',
-            message: 'Agent is done!',
-            time: 5000,
-            wait: false
+        const child = spawn('node', [
+            notifierScript,
+            '-t', 'My AI Agent',
+            '-m', 'Agent is done!',
+            '-s'  // silent mode (no sound)
+        ], {
+            detached: true,
+            stdio: 'ignore',
+            windowsHide: true
         });
+        
+        child.unref();
     } catch (e) {
         // Ignore errors silently
     }
