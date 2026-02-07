@@ -8,7 +8,7 @@ import * as path from 'path';
 /**
  * Shows a notification (non-blocking, cross-platform)
  */
-function showNotification() {
+function showNotification(agentName: string) {
     try {
         // Use node-notifier CLI which is cross-platform and non-blocking
         // Execute via node directly to avoid shell window
@@ -16,7 +16,7 @@ function showNotification() {
         
         const child = spawn('node', [
             notifierScript,
-            '-t', 'My AI Agent',
+            '-t', agentName.toUpperCase(),
             '-m', 'Agent is done!',
             '-s'  // silent mode (no sound)
         ], {
@@ -80,7 +80,7 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
         const endTime = performance.now();
         const timeTaken = (endTime - startTime) / 1000;
         console.log(`\n${chalk.dim.italic(`Answered via ${chalk.bold.cyan(bestToolName.toUpperCase())} (BEST) in ${timeTaken.toFixed(1)}s`)}`);
-        showNotification();
+        showNotification(bestToolName);
         return;
     }
 
@@ -111,7 +111,7 @@ export async function defaultCommand(prompt: string, options?: { autocheck?: boo
             const endTime = performance.now();
             const timeTaken = (endTime - startTime) / 1000;
             console.log(`\n${chalk.dim.italic(`Answered via ${chalk.bold.cyan(tool.name.toUpperCase())} in ${timeTaken.toFixed(1)}s`)}`);
-            showNotification();
+            showNotification(tool.name);
             return;
         } else {
             configManager.updateTool(tool.name, {
